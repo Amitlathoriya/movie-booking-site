@@ -2,6 +2,7 @@ import express from 'express';
 import mysql from 'mysql';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import adminRoutes from './admin.js';
 
 const app = express();
 app.use(bodyParser.json());
@@ -35,7 +36,6 @@ app.post('/api/login', (req, res) => {
 app.post('/api/signup', (req, res) => {
   const { email, password } = req.body;
 
-  // Check if the email already exists
   const checkQuery = 'SELECT * FROM users WHERE email = ?';
   db.query(checkQuery, [email], (err, results) => {
     if (err) return res.status(500).send('Server error');
@@ -43,7 +43,6 @@ app.post('/api/signup', (req, res) => {
       return res.status(400).send({ success: false, message: 'Email already exists' });
     }
 
-    // Insert new user into the database
     const insertQuery = 'INSERT INTO users (email, password) VALUES (?, ?)';
     db.query(insertQuery, [email, password], (err) => {
       if (err) return res.status(500).send('Server error');
@@ -51,6 +50,9 @@ app.post('/api/signup', (req, res) => {
     });
   });
 });
+
+// Use admin routes
+app.use('/api', adminRoutes);
 
 const PORT = 5000;
 app.listen(PORT, () => {

@@ -1,59 +1,77 @@
-const products = [
-    {
-      id: 1,
-      name: 'Hacked',
-      href: '#',
-      price: '$48',
-      imageSrc: 'https://upload.wikimedia.org/wikipedia/en/5/5e/Hacked_film_poster.jpg',
-      imageAlt: 'Hacked',
-    },
-    {
-      id: 2,
-      name: 'Sanam Re',
-      href: '#',
-      price: '$35',
-      imageSrc: 'https://upload.wikimedia.org/wikipedia/en/9/9f/Sanam_Re_movie_poster.jpg',
-      imageAlt: 'Sanam Re',
-    },
-    {
-      id: 3,
-      name: 'Thugs',
-      href: '#',
-      price: '$89',
-      imageSrc: 'https://upload.wikimedia.org/wikipedia/en/6/64/Thugs_Tamil_film_poster.jpg',
-      imageAlt: 'Thugs',
-    },
-    {
-      id: 4,
-      name: 'Baby John',
-      href: '#',
-      price: '$35',
-      imageSrc: 'https://upload.wikimedia.org/wikipedia/en/2/29/Baby_John_%28title_card%29.jpg',
-      imageAlt: 'Baby John',
-    },
-    // More products...
-  ]
-  
-  export default function Hero() {
-    return (
-      <div className="bg-white">
-        <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
-          <h2 className="sr-only">Products</h2>
-  
-          <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
-            {products.map((product) => (
-              <a key={product.id} href={product.href} className="group" >
-                <img
-                  alt={product.imageAlt}
-                  src={product.imageSrc}
-                  className="aspect-square w-full rounded-lg bg-gray-200 object-cover group-hover:opacity-75 xl:aspect-7/8"
-                />
-                <h3 className="mt-4 text-sm text-gray-700">{product.name}</h3>
-                <p className="mt-1 text-lg font-medium text-gray-900">{product.price}</p>
-              </a>
-            ))}
-          </div>
+import { useState, useEffect } from 'react';
+
+export default function Hero() {
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [newMovie, setNewMovie] = useState({ name: '', price: '' });
+  const [movies, setMovies] = useState([]);
+
+  useEffect(() => {
+    const adminStatus = localStorage.getItem('isAdmin') === 'true';
+    setIsAdmin(adminStatus);
+  }, []);
+
+  const handleAddMovie = () => {
+    if (!newMovie.name.trim() || !newMovie.price.trim()) {
+      alert('Please enter both a movie name and a price.');
+      return;
+    }
+
+    // Add new movie to state
+    setMovies([...movies, { ...newMovie, id: Date.now() }]);
+    setNewMovie({ name: '', price: '' }); // Clear inputs
+  };
+
+  const handleRemoveMovie = (movieId) => {
+    setMovies(movies.filter((movie) => movie.id !== movieId));
+  };
+
+  return (
+    <div className="bg-white">
+      {isAdmin ? (
+        <div className="admin-panel p-4">
+          <h2>Admin Panel</h2>
+          <input
+            type="text"
+            placeholder="Movie Name"
+            value={newMovie.name}
+            onChange={(e) => setNewMovie({ ...newMovie, name: e.target.value })}
+            className="border p-2 m-2"
+          />
+          <input
+            type="text"
+            placeholder="Price"
+            value={newMovie.price}
+            onChange={(e) => setNewMovie({ ...newMovie, price: e.target.value })}
+            className="border p-2 m-2"
+          />
+          <button onClick={handleAddMovie} className="bg-blue-500 text-white px-4 py-2">
+            Add Movie
+          </button>
+        </div>
+      ) : null}
+
+      <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
+        <h2 className="sr-only">Movies</h2>
+        <div id="movie-grid" className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {movies.map((movie) => (
+            <div
+              key={movie.id}
+              className="group border border-gray-300 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-4"
+            >
+              <h3 className="mt-2 text-sm font-semibold text-gray-700">{movie.name}</h3>
+              <p className="mt-1 text-lg font-medium text-gray-900">{movie.price}</p>
+              {isAdmin && (
+                <button
+                  className="mt-2 text-sm text-red-500 hover:underline"
+                  onClick={() => handleRemoveMovie(movie.id)}
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+          ))}
         </div>
       </div>
-    )
-  }
+    </div>
+  );
+}

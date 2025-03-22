@@ -12,6 +12,9 @@ export default function Login() {
     try {
       const response = await axios.post('http://localhost:5000/api/login', { email, password });
       if (response.data.success) {
+        // Check if the logged-in user is an admin
+        const isAdmin = email === 'admin@example.com'; // Replace with your admin email
+        localStorage.setItem('isAdmin', isAdmin); // Store admin status in localStorage
         navigate('/app'); // Redirect to App.jsx
       } else {
         alert('Invalid email or password');
